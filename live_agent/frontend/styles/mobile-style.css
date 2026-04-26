@@ -1,0 +1,439 @@
+/* ============================================================
+   Mobile-first stylesheet for Gemini Live Assistant
+   Target: phones (portrait), scales gracefully to desktop
+   ============================================================ */
+
+/* ---------- Reset & base ---------- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overscroll-behavior: none;           /* disable pull-to-refresh on mobile */
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    min-height: 100vh;
+    min-height: 100dvh;                   /* dynamic viewport height on mobile */
+    overflow: hidden;                     /* no page scroll — only #output scrolls */
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    background: none;
+    color: inherit;
+}
+
+/* ---------- Utility ---------- */
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   APP SHELL (full-screen flex column)
+   ============================================================ */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* ============================================================
+   HEADER (fixed at top)
+   ============================================================ */
+.mobile-header {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-icon {
+    font-size: 1.5rem;
+}
+
+.brand-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* --- Status pill (Ready / Connected / Speaking) --- */
+.status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #aaa;
+}
+
+.status-pill.status-idle .status-dot      { background: #aaa; }
+.status-pill.status-connected .status-dot {
+    background: #2ed573;
+    box-shadow: 0 0 8px #2ed573;
+    animation: dot-pulse 2s ease-in-out infinite;
+}
+.status-pill.status-speaking {
+    background: rgba(255, 177, 66, 0.2);
+    border-color: rgba(255, 177, 66, 0.4);
+}
+.status-pill.status-speaking .status-dot {
+    background: #ffb142;
+    box-shadow: 0 0 8px #ffb142;
+    animation: dot-pulse 0.8s ease-in-out infinite;
+}
+.status-pill.status-error {
+    background: rgba(255, 71, 87, 0.2);
+    border-color: rgba(255, 71, 87, 0.4);
+}
+.status-pill.status-error .status-dot { background: #ff4757; }
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+}
+
+/* ============================================================
+   FUNCTION INFO BANNER
+   ============================================================ */
+.function-info {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    margin: 10px 14px 0;
+    background: rgba(255, 177, 66, 0.18);
+    border: 1px solid rgba(255, 177, 66, 0.4);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    animation: slide-down 0.3s ease-out;
+}
+
+.function-icon {
+    font-size: 1rem;
+    animation: spin 2s linear infinite;
+}
+
+.function-text {
+    font-weight: 500;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes slide-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   MAIN ZONE (takes remaining vertical space)
+   ============================================================ */
+.main-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    gap: 12px;
+    overflow: hidden;                    /* inner #output handles scrolling */
+}
+
+/* ---------- Video preview ---------- */
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 240px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+}
+
+#videoPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.live-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 71, 87, 0.9);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: live-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+/* ---------- Output / chat ---------- */
+.output {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.output::-webkit-scrollbar { width: 4px; }
+.output::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+}
+
+.welcome {
+    margin: auto;
+    text-align: center;
+    opacity: 0.85;
+    padding: 20px;
+}
+
+.welcome-icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.welcome h2 {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.welcome p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+/* ---------- Message bubbles ---------- */
+.message {
+    padding: 10px 14px;
+    border-radius: 18px;
+    max-width: 85%;
+    word-wrap: break-word;
+    animation: msg-in 0.25s ease-out;
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+
+@keyframes msg-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.message.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #5a7cd6, #6b52a0);
+    border-bottom-right-radius: 4px;
+}
+
+.message.assistant {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.15);
+    border-bottom-left-radius: 4px;
+}
+
+/* ============================================================
+   CONTROLS ZONE (fixed at bottom)
+   ============================================================ */
+.controls-zone {
+    flex-shrink: 0;
+    padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0));
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+/* ---------- Play button (initial state) ---------- */
+.play-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.play-button {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2ed573, #1dd1a1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(46, 213, 115, 0.5),
+                0 0 0 0 rgba(46, 213, 115, 0.6);
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+    animation: play-pulse 2.5s ease-out infinite;
+    padding-left: 6px;                   /* optical alignment for Play triangle */
+}
+
+.play-button:active {
+    transform: scale(0.92);
+    animation: none;
+}
+
+@keyframes play-pulse {
+    0% {
+        box-shadow: 0 8px 30px rgba(46, 213, 115, 0.5),
+                    0 0 0 0 rgba(46, 213, 115, 0.6);
+    }
+    100% {
+        box-shadow: 0 8px 30px rgba(46, 213, 115, 0.5),
+                    0 0 0 24px rgba(46, 213, 115, 0);
+    }
+}
+
+.play-hint {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    font-weight: 500;
+}
+
+/* ---------- Media controls (active state) ---------- */
+.media-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.control-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* --- State variants --- */
+.control-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.45);
+}
+
+.control-btn.muted {
+    background: rgba(255, 71, 87, 0.3);
+    border-color: rgba(255, 71, 87, 0.5);
+}
+
+.control-stop {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(238, 90, 111, 0.4);
+    width: 68px;                         /* slightly larger: primary action */
+    height: 68px;
+}
+
+.control-stop:active {
+    transform: scale(0.92);
+    box-shadow: 0 2px 10px rgba(238, 90, 111, 0.3);
+}
+
+/* ============================================================
+   RESPONSIVE — Desktop adjustments
+   ============================================================ */
+@media (min-width: 768px) {
+    .app-shell {
+        max-width: 500px;
+        margin: 20px auto;
+        height: calc(100vh - 40px);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .video-wrapper {
+        max-height: 280px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — Very small screens
+   ============================================================ */
+@media (max-width: 340px) {
+    .control-btn { width: 52px; height: 52px; }
+    .control-stop { width: 60px; height: 60px; }
+    .media-controls { gap: 10px; }
+    .play-button { width: 76px; height: 76px; }
+}

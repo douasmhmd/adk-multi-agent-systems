@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <title>Gemini Assistant</title>
+    <link rel="stylesheet" href="styles/mobile-style.css"></head>
+<body>
+
+    <div class="app-shell">
+
+        <!-- Header -->
+        <header class="mobile-header">
+            <div class="brand">
+                <span class="brand-icon">🤖</span>
+                <span class="brand-name">Gemini</span>
+            </div>
+            <div id="statusPill" class="status-pill status-idle">
+                <span class="status-dot"></span>
+                <span class="status-label">Ready</span>
+            </div>
+        </header>
+
+        <!-- Function call info (appears when a tool is called) -->
+        <div id="functionInfo" class="function-info hidden">
+            <span class="function-icon">⚙️</span>
+            <span id="functionInfoText" class="function-text">Tool running...</span>
+        </div>
+
+        <!-- Main interaction zone -->
+        <main class="main-zone">
+
+            <!-- Video preview (hidden until webcam/screen is active) -->
+            <div id="videoWrapper" class="video-wrapper hidden">
+                <video id="videoPreview" autoplay playsinline muted></video>
+                <div class="live-badge">● LIVE</div>
+            </div>
+
+            <!-- Conversation / chat output -->
+            <div id="output" class="output">
+                <div class="welcome">
+                    <div class="welcome-icon">🎙️</div>
+                    <h2>Tap Play to start</h2>
+                    <p>Have a natural voice conversation with Gemini.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Controls zone (bottom of screen) -->
+        <footer class="controls-zone">
+
+            <!-- Play button (shown initially) -->
+            <div id="playButtonContainer" class="play-container">
+                <button id="connectButton" class="play-button" aria-label="Start session">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <p class="play-hint">Tap to start</p>
+            </div>
+
+            <!-- Media controls (shown when session is active) -->
+            <div id="mediaButtonsContainer" class="media-controls hidden">
+
+                <button id="micButton" class="control-btn control-mic" aria-label="Mute microphone">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                    </svg>
+                </button>
+
+                <button id="webcamButton" class="control-btn control-cam" aria-label="Start webcam">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                </button>
+
+                <button id="stopButton" class="control-btn control-stop" aria-label="End session">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M6 6h12v12H6z"/>
+                    </svg>
+                </button>
+
+                <button id="screenButton" class="control-btn control-screen" aria-label="Share screen">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
+                    </svg>
+                </button>
+
+                <button id="switchCameraButton" class="control-btn control-switch hidden" aria-label="Switch camera">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13H9v2.5L5.5 12 9 8.5V11h6V8.5l3.5 3.5-3.5 3.5z"/>
+                    </svg>
+                </button>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+    <script type="module">
+import { AudioStreamer } from './audio-streamer.js';
+import { MediaHandler } from './media-handler.js';
+
+// =============================================================
+// Configuration
+// =============================================================
+const GEMINI_MODEL = "models/gemini-3.1-flash-live-preview";
+const PROXY_URL ='ws://localhost:8081';
+
+// =============================================================
+// AudioRecorder class (reused from index.html version)
+// =============================================================
+class AudioRecorder {
+    constructor() {
+        this.audioContext = null;
+        this.workletNode = null;
+        this.stream = null;
+        this.source = null;
+    }
+
+    async start() {
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioContext = new AudioContext({ sampleRate: 16000 });
+        await this.audioContext.audioWorklet.addModule('audio-processor.js');
+        this.workletNode = new AudioWorkletNode(this.audioContext, 'audio-processor');
+        this.source = this.audioContext.createMediaStreamSource(this.stream);
+        this.source.connect(this.workletNode);
+    }
+
+    mute()   { if (this.source && this.workletNode) this.source.disconnect(this.workletNode); }
+    unmute() { if (this.source && this.workletNode) this.source.connect(this.workletNode); }
+
+    stop() {
+        if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+        if (this.audioContext) this.audioContext.close();
+        this.stream = null;
+        this.audioContext = null;
+        this.workletNode = null;
+        this.source = null;
+    }
+}
+
+// =============================================================
+// UI element references
+// =============================================================
+const statusPill            = document.getElementById('statusPill');
+const statusLabel           = statusPill.querySelector('.status-label');
+const functionInfo          = document.getElementById('functionInfo');
+const functionInfoText      = document.getElementById('functionInfoText');
+const videoWrapper          = document.getElementById('videoWrapper');
+const videoPreview          = document.getElementById('videoPreview');
+const output                = document.getElementById('output');
+
+const playButtonContainer   = document.getElementById('playButtonContainer');
+const connectButton         = document.getElementById('connectButton');
+
+const mediaButtonsContainer = document.getElementById('mediaButtonsContainer');
+const micButton             = document.getElementById('micButton');
+const webcamButton          = document.getElementById('webcamButton');
+const screenButton          = document.getElementById('screenButton');
+const stopButton            = document.getElementById('stopButton');
+const switchCameraButton    = document.getElementById('switchCameraButton');
+
+// =============================================================
+// Instances
+// =============================================================
+const recorder     = new AudioRecorder();
+const streamer     = new AudioStreamer();
+const mediaHandler = new MediaHandler();
+mediaHandler.setVideoElement(videoPreview);
+
+// =============================================================
+// App state
+// =============================================================
+let ws              = null;
+let isSessionActive = false;
+let isMicMuted      = false;
+let mediaType       = null;          // 'webcam' | 'screen' | null
+
+// =============================================================
+// UI helpers
+// =============================================================
+function setStatus(state, label) {
+    statusPill.className = `status-pill status-${state}`;
+    statusLabel.textContent = label;
+}
+
+function showFunctionInfo(text) {
+    functionInfoText.textContent = text;
+    functionInfo.classList.remove('hidden');
+    clearTimeout(showFunctionInfo._t);
+    showFunctionInfo._t = setTimeout(() => functionInfo.classList.add('hidden'), 3500);
+}
+
+function addMessage(text, sender) {
+    // Remove welcome message on first real message
+    const welcome = output.querySelector('.welcome');
+    if (welcome) welcome.remove();
+
+    const msg = document.createElement('div');
+    msg.className = 'message ' + sender;
+    msg.textContent = text;
+    output.appendChild(msg);
+    output.scrollTop = output.scrollHeight;
+}
+
+function switchToMediaControls() {
+    playButtonContainer.classList.add('hidden');
+    mediaButtonsContainer.classList.remove('hidden');
+}
+
+function switchToPlayButton() {
+    mediaButtonsContainer.classList.add('hidden');
+    playButtonContainer.classList.remove('hidden');
+    videoWrapper.classList.add('hidden');
+    micButton.classList.remove('muted');
+    webcamButton.classList.remove('active');
+    screenButton.classList.remove('active');
+    switchCameraButton.classList.add('hidden');
+}
+
+function resetWelcome() {
+    output.innerHTML = `
+        <div class="welcome">
+            <div class="welcome-icon">🎙️</div>
+            <h2>Tap Play to start</h2>
+            <p>Have a natural voice conversation with Gemini.</p>
+        </div>
+    `;
+}
+
+// =============================================================
+// WebSocket setup (called on Play)
+// =============================================================
+function connectWebSocket() {
+    return new Promise((resolve, reject) => {
+        ws = new WebSocket(PROXY_URL);
+
+        ws.onopen = () => {
+            console.log('✅ WebSocket connected');
+            resolve();
+        };
+
+        ws.onerror = (err) => {
+            console.error('❌ WebSocket error', err);
+            setStatus('error', 'Error');
+            reject(err);
+        };
+
+        ws.onclose = () => {
+            console.warn('⚠️ WebSocket closed');
+            isSessionActive = false;
+            setStatus('idle', 'Ready');
+        };
+
+        ws.onmessage = handleServerMessage;
+    });
+}
+
+// =============================================================
+// Server message handler
+// =============================================================
+async function handleServerMessage(event) {
+    const response = JSON.parse(event.data);
+
+    // ADK format: { type: "audio" | "interrupted" | "backend", data: ... }
+    if (response.type === "interrupted") {
+        if (streamer.stop) streamer.stop();
+        setStatus('connected', 'Listening');
+        return;
+    }
+
+    if (response.type === "audio") {
+        setStatus('speaking', 'Speaking');
+        await streamer.receiveAudioChunk(response.data);
+        return;
+    }
+
+    if (response.type === "backend" && response.data === "turn_complete") {
+        if (!streamer.isPlaying) {
+            setStatus('connected', 'Listening');
+        }
+        return;
+    }
+}
+// =============================================================
+// CONNECT (Play button) — starts everything
+// =============================================================
+connectButton.addEventListener('click', async () => {
+    setStatus('idle', 'Connecting...');
+
+    try {
+        await connectWebSocket();
+    } catch {
+        alert('Could not connect to the server. Is the proxy running?');
+        return;
+    }
+
+    try {
+        await recorder.start();
+    } catch {
+        alert('Microphone access denied.');
+        ws.close();
+        return;
+    }
+
+    // Wire the worklet to send audio chunks via WebSocket
+    recorder.workletNode.port.onmessage = (event) => {
+        if (!isSessionActive || ws.readyState !== WebSocket.OPEN) return;
+        const b64 = btoa(String.fromCharCode(...new Uint8Array(event.data)));
+        ws.send(JSON.stringify({
+            realtimeInput: {
+                mediaChunks: [{ mime_type: "audio/pcm", data: b64 }]
+            }
+        }));
+    };
+
+    isSessionActive = true;
+    switchToMediaControls();
+    setStatus('connected', 'Listening');
+});
+
+// =============================================================
+// STOP — ends the session completely
+// =============================================================
+stopButton.addEventListener('click', () => {
+    if (streamer.stop) streamer.stop();
+    recorder.stop();
+    mediaHandler.stopAll();
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+
+    isSessionActive = false;
+    isMicMuted      = false;
+    mediaType       = null;
+
+    switchToPlayButton();
+    resetWelcome();
+    setStatus('idle', 'Ready');
+});
+
+// =============================================================
+// MIC — mute / unmute
+// =============================================================
+micButton.addEventListener('click', () => {
+    if (!isSessionActive) return;
+
+    isMicMuted = !isMicMuted;
+    if (isMicMuted) {
+        recorder.mute();
+        micButton.classList.add('muted');
+        setStatus('idle', 'Muted');
+    } else {
+        recorder.unmute();
+        micButton.classList.remove('muted');
+        setStatus('connected', 'Listening');
+    }
+});
+
+// =============================================================
+// WEBCAM — toggle
+// =============================================================
+webcamButton.addEventListener('click', async () => {
+    if (!isSessionActive) return;
+
+    // Already active → stop
+    if (mediaType === 'webcam') {
+        mediaHandler.stopAll();
+        videoWrapper.classList.add('hidden');
+        webcamButton.classList.remove('active');
+        switchCameraButton.classList.add('hidden');
+        mediaType = null;
+        return;
+    }
+
+    // Stop screen if active first
+    if (mediaType === 'screen') {
+        mediaHandler.stopAll();
+        screenButton.classList.remove('active');
+    }
+
+    const success = await mediaHandler.startWebcam();
+    if (!success) {
+        alert('Webcam access denied.');
+        return;
+    }
+
+    videoWrapper.classList.remove('hidden');
+    mediaHandler.startFrameCapture();
+    webcamButton.classList.add('active');
+    mediaType = 'webcam';
+
+    // Show "switch camera" only on mobile (touch devices with multiple cameras)
+    if ('ontouchstart' in window) {
+        switchCameraButton.classList.remove('hidden');
+    }
+});
+
+// =============================================================
+// SCREEN SHARE — toggle
+// =============================================================
+screenButton.addEventListener('click', async () => {
+    if (!isSessionActive) return;
+
+    if (mediaType === 'screen') {
+        mediaHandler.stopAll();
+        videoWrapper.classList.add('hidden');
+        screenButton.classList.remove('active');
+        mediaType = null;
+        return;
+    }
+
+    if (mediaType === 'webcam') {
+        mediaHandler.stopAll();
+        webcamButton.classList.remove('active');
+        switchCameraButton.classList.add('hidden');
+    }
+
+    const success = await mediaHandler.startScreenShare();
+    if (!success) {
+        alert('Screen share denied.');
+        return;
+    }
+
+    videoWrapper.classList.remove('hidden');
+    mediaHandler.startFrameCapture();
+    screenButton.classList.add('active');
+    mediaType = 'screen';
+});
+
+// =============================================================
+// SWITCH CAMERA — front ↔ back on mobile
+// =============================================================
+switchCameraButton.addEventListener('click', async () => {
+    if (mediaType !== 'webcam') return;
+
+    // Toggle facing mode by stopping and restarting with the opposite one
+    const current = mediaHandler._facingMode || 'user';
+    const next    = current === 'user' ? 'environment' : 'user';
+
+    mediaHandler.stopAll();
+
+    // Restart webcam with opposite facing mode
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: next, width: 640, height: 480 },
+            audio: false
+        });
+        mediaHandler.stream = stream;
+        mediaHandler._facingMode = next;
+        videoPreview.srcObject = stream;
+        videoWrapper.classList.remove('hidden');
+        mediaHandler.startFrameCapture();
+    } catch (err) {
+        console.error('Failed to switch camera:', err);
+    }
+});    </script>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Live Agent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <h1>Gemini Live Agent</h1>
+            </div>
+            <div id="connectionStatus" class="connection-status disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Disconnected</span>
+            </div>
+        </header>
+
+        <!-- Main chat area -->
+        <main class="chat-area">
+            <!-- Status bar -->
+            <div id="status" class="status-bar">Ready. Click the button to start the session.</div>
+
+            <!-- Conversation history -->
+            <div id="conversation" class="conversation">
+                <div class="welcome-message">
+                    <span class="welcome-icon">💬</span>
+                    <p>Your conversation will appear here.</p>
+                    <p class="hint">Click "Start Session" and start talking!</p>
+                </div>
+            </div>
+
+            <!-- Video display (hidden by default) -->
+            <div id="videoContainer" class="video-container hidden">
+                <video id="videoElement" autoplay playsinline muted></video>
+                <div class="video-overlay">
+                    <span class="live-indicator">● LIVE</span>
+                </div>
+            </div>
+
+            <!-- Voice activity indicator -->
+            <div id="voiceIndicator" class="voice-indicator">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <span class="indicator-label">Listening...</span>
+            </div>
+        </main>
+
+        <!-- Bottom controls -->
+        <footer class="controls">
+            <button id="micButton" class="btn btn-primary">
+                <span class="btn-icon">🎤</span>
+                <span class="btn-label">Start Session</span>
+            </button>
+            <button id="webcamButton" class="btn btn-secondary">
+                <span class="btn-icon">📹</span>
+                <span class="btn-label">Webcam</span>
+            </button>
+            <button id="screenButton" class="btn btn-secondary">
+                <span class="btn-icon">🖥️</span>
+                <span class="btn-label">Screen</span>
+            </button>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Live Agent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <h1>Gemini Live Agent</h1>
+            </div>
+            <div id="connectionStatus" class="connection-status disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Disconnected</span>
+            </div>
+        </header>
+
+        <!-- Main chat area -->
+        <main class="chat-area">
+            <!-- Status bar -->
+            <div id="status" class="status-bar">Ready. Click the button to start the session.</div>
+
+            <!-- Conversation history -->
+            <div id="conversation" class="conversation">
+                <div class="welcome-message">
+                    <span class="welcome-icon">💬</span>
+                    <p>Your conversation will appear here.</p>
+                    <p class="hint">Click "Start Session" and start talking!</p>
+                </div>
+            </div>
+
+            <!-- Video display (hidden by default) -->
+            <div id="videoContainer" class="video-container hidden">
+                <video id="videoElement" autoplay playsinline muted></video>
+                <div class="video-overlay">
+                    <span class="live-indicator">● LIVE</span>
+                </div>
+            </div>
+
+            <!-- Voice activity indicator -->
+            <div id="voiceIndicator" class="voice-indicator">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <span class="indicator-label">Listening...</span>
+            </div>
+        </main>
+
+        <!-- Bottom controls -->
+        <footer class="controls">
+            <button id="micButton" class="btn btn-primary">
+                <span class="btn-icon">🎤</span>
+                <span class="btn-label">Start Session</span>
+            </button>
+            <button id="webcamButton" class="btn btn-secondary">
+                <span class="btn-icon">📹</span>
+                <span class="btn-label">Webcam</span>
+            </button>
+            <button id="screenButton" class="btn btn-secondary">
+                <span class="btn-icon">🖥️</span>
+                <span class="btn-label">Screen</span>
+            </button>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
