@@ -6,8 +6,7 @@ multi-agent orchestrated pipelines.
 
 ## 🎬 Demo Video
 
-[![Watch the demo](multi-orchestrated-agent/docs/demo.png)](https://watch?v=pjUKXZHvu4c)
-
+[![Watch the demo](https://img.youtube.com/vi/watch?v=pjUKXZHvu4c/maxresdefault.jpg)](https://youtu.be/watch?v=pjUKXZHvu4c)
 ▶️ **[Watch the full demo on YouTube](https://youtu.be/watch?v=pjUKXZHvu4c)**
 
 ## 📦 Projects
