@@ -4,10 +4,11 @@ AI agent projects built with Google's open-source Agent Development Kit (ADK),
 demonstrating modern agentic patterns from single-agent specialists to
 multi-agent orchestrated pipelines.
 
-## 🎬 Demo Video
+## 🎬 Demo Video   (DOUAS-MOHAMED)
 
-[![Watch the demo](https://img.youtube.com/vi/watch?v=pjUKXZHvu4c/maxresdefault.jpg)](https://youtu.be/watch?v=pjUKXZHvu4c)
-▶️ **[Watch the full demo on YouTube](https://youtu.be/watch?v=pjUKXZHvu4c)**
+[![Watch the demo](https://img.youtube.com/vi/pjUKXZHvu4c/maxresdefault.jpg)](https://youtu.be/pjUKXZHvu4c)
+
+▶️ **[Watch the full demo on YouTube](https://youtu.be/pjUKXZHvu4c)**
 
 ## 📦 Projects
 
