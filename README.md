@@ -1,53 +1,43 @@
-\# ADK Multi-Agent Systems
+# ADK Multi-Agent Systems
 
+AI agent projects built with Google's open-source Agent Development Kit (ADK),
+demonstrating modern agentic patterns from single-agent specialists to
+multi-agent orchestrated pipelines.
 
+## 🎬 Demo Video
 
-Two AI agent projects built with Google's open-source Agent Development Kit (ADK)
+[![Watch the demo](multi-orchestrated-agent/docs/demo.png)](https://watch?v=pjUKXZHvu4c)
 
-to learn the patterns of modern agentic systems — from a single specialized agent
+▶️ **[Watch the full demo on YouTube](https://youtu.be/watch?v=pjUKXZHvu4c)**
 
-to a multi-agent orchestrated pipeline.
+## 📦 Projects
 
+### 🌟 [multi-orchestrated-agent/](./multi-orchestrated-agent/) — Multi-Agent Teaching Assistant
+A `SequentialAgent` pipeline of three specialized agents (grammar, math, summary)
+collaborating through shared session state to deliver adaptive, kid-friendly responses.
 
+**Key concepts:** `SequentialAgent` · `output_key` · `before_agent_callback` · template substitution
 
-\## 📦 Projects
-
-
-
-\### 1. \[basic\_agent/](./basic\_agent/) — Single-Agent Math Tutor
-
+### [basic_agent/](./basic_agent/) — Single-Agent Math Tutor
 A specialized math agent with custom tools, persona, and few-shot examples.
+Foundation for understanding ADK's core patterns.
 
-Demonstrates the core ADK pattern: `Agent` + `Runner` + `SessionService`.
+**Key concepts:** `Agent` · `Runner` · `SessionService` · function calling
 
+### [live_agent/](./live_agent/) — Live Voice Math Tutor
+Real-time voice agent built with ADK Live, streaming audio bidirectionally
+through `LiveRequestQueue` while preserving session state and tools.
 
+**Key concepts:** `InMemoryRunner` · `LiveRequestQueue` · WebSocket streaming
 
-\### 2. \[multi-orchestrated-agent/](./multi-orchestrated-agent/) — Teaching Assistant Pipeline
+## 🛠️ Tech Stack
 
-Three specialized agents (grammar, math, summary) working as a `SequentialAgent`
+- Python 3.12
+- Google Agent Development Kit (ADK)
+- Gemini 2.5 Flash + Live (native audio)
+- ADK Web (debug & monitoring UI)
 
-pipeline with shared session state and guardrails.
-
-Demonstrates `output\_key`, `before\_agent\_callback`, and template substitution.
-
-
-
-\## 🛠️ Tech Stack
-
-
-
-\- Python 3.12
-
-\- Google Agent Development Kit (ADK)
-
-\- Gemini 2.5 Flash
-
-\- ADK Web (debug \& monitoring UI)
-
-
-
-\## 📚 Credits
-
+## 📚 Credits
 
 
 Built while following the O'Reilly book \*Multimodal Real-Time AI Interaction Architectures\*
@@ -56,11 +46,6 @@ by co-authors  {As a Generative AI Global Blackbelt at Google Cloud, @Heiko Hotz
 
 core architecture goes to the book's authors.
 
-
-
-\## 📄 License
-
-
+## 📄 License
 
 MIT
-
